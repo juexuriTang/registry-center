@@ -1,0 +1,54 @@
+#spring
+spring:
+  application:
+    name: atlantis-registry-center
+#app
+server:
+  port: 8000
+#eureka
+eureka:
+  instance:
+    appname: ${spring.application.name}
+    prefer-ip-address: true
+    instanceId: ${spring.application.name}:${vcap.application.instance_id:${spring.application.instance_id:${server.port}}}
+    status-page-url-path: /${spring.application.name}/monitor/info
+    health-check-url-path: /${spring.application.name}/monitor/health
+    #每间隔5s，向服务端发送一次心跳，证明自己依然”存活“
+    lease-renewal-interval-in-seconds: 5
+    #告诉服务端，如果我20s之内没有给你发心跳，就代表我“死”了，将我踢出掉
+    lease-expiration-duration-in-seconds: 20
+  client:
+    # 非集群配false
+    registerWithEureka: false 
+    fetchRegistry: false
+    serviceUrl:
+      # 集群化时请配置为其它(除自己)节点和端口，咧：http://localhost:8001/eureka/,http://localhost:8002/eureka/
+      # 非集群时配置自己 http://localhost:8000/eureka/
+      defaultZone: http://localhost:8000/eureka/
+    server:
+      # 关闭自我保护
+      enable-self-preservation: false
+      # 清理服务清理间隔
+      eviction-interval-timer-in-ms: 30000
+
+#监控
+management:
+  server:
+    port: ${server.port}
+  endpoints:
+    web:
+      base-path: /${spring.application.name}/monitor
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      show-details: always
+
+#info
+info:
+  build:
+    artifact: "@project.artifactId@"
+    name: "@project.name@"
+    version: "@project.version@"
+
+#security
